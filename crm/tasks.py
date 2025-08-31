@@ -3,6 +3,7 @@ from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
 from datetime import datetime
 import logging
+import requests
 
 logging.basicConfig(filename='/tmp/crm_report_log.txt',
                     level=logging.INFO,
