@@ -5,6 +5,7 @@ from celery import crontab
 INSTALLED_APPS = [
     # other apps ...
     'django_celery_beat',
+    'django_crontab',
 ]
 
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
