@@ -3,7 +3,9 @@ import re
 from graphene import relay
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django import DjangoObjectType
-from crm.models import Customer, Product, Order
+from crm.models import Customer 
+from crm.models import Product 
+from crm.models import Order
 from crm.filters import CustomerFilter, ProductFilter, OrderFilter
 from django.db import transaction
 from datetime import datetime

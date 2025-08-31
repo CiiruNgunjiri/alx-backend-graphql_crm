@@ -1,7 +1,9 @@
 import logging
 from datetime import datetime
 import requests
-from django.conf import settings
+from gql import gql, Client
+from gql.transport.requests import RequestsHTTPTransport
+
 
 def log_crm_heartbeat():
     timestamp = datetime.now().strftime("%d/%m/%Y-%H:%M:%S")
@@ -11,24 +13,28 @@ def log_crm_heartbeat():
     with open("/tmp/crm_heartbeat_log.txt", "a") as f:
         f.write(message)
 
-    # Optional: Query the GraphQL 'hello' field to verify endpoint
+    # Optional: Query the GraphQL 'hello' field to verify endpoint using gql client
     try:
-        url = "http://localhost:8000/graphql"
-        query = '{ hello }'
-        response = requests.post(url, json={"query": query})
-        if response.status_code == 200:
-            # Just ensure it contains the 'hello' key
-            data = response.json()
-            if "data" in data and "hello" in data["data"]:
-                # Log success (optional)
-                with open("/tmp/crm_heartbeat_log.txt", "a") as f:
-                    f.write(f"{timestamp} GraphQL endpoint responded successfully\n")
-        else:
-            with open("/tmp/crm_heartbeat_log.txt", "a") as f:
-                f.write(f"{timestamp} GraphQL endpoint returned status {response.status_code}\n")
+        transport = RequestsHTTPTransport(
+            url="http://localhost:8000/graphql",
+            verify=False,
+            retries=3,
+        )
+        client = Client(transport=transport, fetch_schema_from_transport=True)
+
+        query = gql("""
+        query {
+            hello
+        }
+        """)
+        result = client.execute(query)
+
+        with open("/tmp/crm_heartbeat_log.txt", "a") as f:
+            f.write(f"{timestamp} GraphQL endpoint responded: {result['hello']}\n")
     except Exception as e:
         with open("/tmp/crm_heartbeat_log.txt", "a") as f:
             f.write(f"{timestamp} Failed to reach GraphQL endpoint: {str(e)}\n")
+
 
 def update_low_stock():
     url = "http://localhost:8000/graphql"
